@@ -95,7 +95,7 @@ export default function CommissionPage() {
         options: { emailRedirectTo: `${location.origin}/auth/callback` },
       })
 
-      router.push('/commission/success')
+      router.push(`/commission/success?email=${encodeURIComponent(form.email)}`)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Something went wrong. Please try again.')
     } finally {
