@@ -74,17 +74,8 @@ export default function CommissionPage() {
     try {
       const supabase = createClient()
 
-      // Send magic link first so they can track their commission
-      await supabase.auth.signInWithOtp({
-        email: form.email,
-        options: { emailRedirectTo: `${location.origin}/auth/callback` },
-      })
-
-      // Get or create session (may not exist yet — that's fine, we use service role via API)
-      const { data: { user } } = await supabase.auth.getUser()
-
       const { error: insertError } = await supabase.from('commissions').insert({
-        client_id: user?.id ?? null,
+        email: form.email,
         community_name: form.community_name,
         genre: form.genre,
         platform: form.platform,
@@ -97,6 +88,13 @@ export default function CommissionPage() {
       })
 
       if (insertError) throw insertError
+
+      // Send magic link after successful insert so they can track their commission
+      await supabase.auth.signInWithOtp({
+        email: form.email,
+        options: { emailRedirectTo: `${location.origin}/auth/callback` },
+      })
+
       router.push('/commission/success')
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Something went wrong. Please try again.')

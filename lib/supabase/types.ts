@@ -37,6 +37,7 @@ export interface Database {
         Row: {
           id: string
           client_id: string | null
+          email: string | null
           community_name: string
           genre: string
           platform: string
@@ -53,6 +54,7 @@ export interface Database {
         }
         Insert: {
           client_id?: string | null
+          email?: string | null
           community_name: string
           genre: string
           platform: string
