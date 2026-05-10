@@ -1,13 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-export default function LoginPage() {
+function LoginForm() {
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState(
+    searchParams.get('error') === 'auth_failed'
+      ? 'Sign-in link expired or already used. Request a new one below.'
+      : ''
+  )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,6 +33,65 @@ export default function LoginPage() {
   }
 
   return (
+    <>
+      {!sent ? (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block font-mono-brand text-[0.52rem] tracking-[0.3em] uppercase text-silver mb-2">
+              Email address
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              placeholder="your@email.com"
+              className="w-full bg-surface border border-[var(--border)] text-crystal placeholder-[var(--muted-color)] px-4 py-3 text-sm font-light outline-none focus:border-corona transition-colors"
+              style={{ borderColor: 'rgba(196,204,216,0.12)' }}
+            />
+          </div>
+
+          {error && (
+            <p className="text-red-400 text-xs font-mono-brand tracking-wider">{error}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full font-heading text-[0.62rem] tracking-[0.22em] uppercase text-void bg-corona py-3 transition-all hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Sending…' : 'Send Magic Link'}
+          </button>
+
+          <p className="text-center text-xs text-silver font-light pt-2">
+            No password. We&apos;ll email you a secure link.
+          </p>
+        </form>
+      ) : (
+        <div className="text-center border border-[rgba(232,184,109,0.2)] p-8"
+          style={{ background: 'rgba(232,184,109,0.04)' }}>
+          <div className="label-mono mb-4">Check your inbox</div>
+          <p className="text-crystal text-sm font-light leading-relaxed mb-4">
+            A magic link was sent to<br />
+            <span className="text-corona">{email}</span>
+          </p>
+          <p className="text-silver text-xs font-light">
+            The link expires in 1 hour. Check your spam folder if it doesn&apos;t arrive.
+          </p>
+          <button
+            onClick={() => setSent(false)}
+            className="mt-6 text-xs text-silver hover:text-corona transition-colors font-mono-brand tracking-wider uppercase"
+          >
+            Use different email
+          </button>
+        </div>
+      )}
+    </>
+  )
+}
+
+export default function LoginPage() {
+  return (
     <div className="min-h-screen flex items-center justify-center px-4"
       style={{ background: 'radial-gradient(ellipse 70% 60% at 50% 40%, rgba(232,184,109,0.04) 0%, transparent 60%), var(--void)' }}>
 
@@ -36,65 +101,15 @@ export default function LoginPage() {
       }} />
 
       <div className="w-full max-w-sm animate-fade-up relative z-10">
-        {/* Logo */}
         <div className="text-center mb-10">
           <div className="label-mono mb-4">Eclipse of Legacies</div>
           <h1 className="font-heading text-2xl tracking-widest text-white mb-2">Elequint</h1>
           <p className="text-sm text-silver font-light">Client portal access</p>
         </div>
 
-        {!sent ? (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block font-mono-brand text-[0.52rem] tracking-[0.3em] uppercase text-silver mb-2">
-                Email address
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                placeholder="your@email.com"
-                className="w-full bg-surface border border-[var(--border)] text-crystal placeholder-[var(--muted-color)] px-4 py-3 text-sm font-light outline-none focus:border-corona transition-colors"
-                style={{ borderColor: 'rgba(196,204,216,0.12)' }}
-              />
-            </div>
-
-            {error && (
-              <p className="text-red-400 text-xs font-mono-brand tracking-wider">{error}</p>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full font-heading text-[0.62rem] tracking-[0.22em] uppercase text-void bg-corona py-3 transition-all hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Sending…' : 'Send Magic Link'}
-            </button>
-
-            <p className="text-center text-xs text-silver font-light pt-2">
-              No password. We&apos;ll email you a secure link.
-            </p>
-          </form>
-        ) : (
-          <div className="text-center border border-[rgba(232,184,109,0.2)] p-8"
-            style={{ background: 'rgba(232,184,109,0.04)' }}>
-            <div className="label-mono mb-4">Check your inbox</div>
-            <p className="text-crystal text-sm font-light leading-relaxed mb-4">
-              A magic link was sent to<br />
-              <span className="text-corona">{email}</span>
-            </p>
-            <p className="text-silver text-xs font-light">
-              The link expires in 1 hour. Check your spam folder if it doesn&apos;t arrive.
-            </p>
-            <button
-              onClick={() => setSent(false)}
-              className="mt-6 text-xs text-silver hover:text-corona transition-colors font-mono-brand tracking-wider uppercase"
-            >
-              Use different email
-            </button>
-          </div>
-        )}
+        <Suspense>
+          <LoginForm />
+        </Suspense>
 
         <div className="mt-8 text-center">
           <a href="/commission" className="text-xs text-silver hover:text-corona transition-colors font-mono-brand tracking-wider uppercase">
