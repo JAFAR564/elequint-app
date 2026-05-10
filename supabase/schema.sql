@@ -29,7 +29,7 @@ begin
   values (
     new.id,
     new.email,
-    case when new.email = current_setting('app.admin_email', true) then 'admin' else 'client' end
+    case when new.email = 'chariskimbeki@gmail.com' then 'admin' else 'client' end
   );
   return new;
 end;
