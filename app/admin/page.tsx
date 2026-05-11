@@ -24,35 +24,47 @@ export default async function AdminPage() {
   const projects = (rawProjects ?? []) as ProjectRow[]
   const pending = commissions.filter(c => c.status === 'pending')
   const active = commissions.filter(c => ['reviewing', 'approved', 'active'].includes(c.status))
+  const delivered = commissions.filter(c => c.status === 'delivered').length
+
+  const stats = [
+    { n: pending.length, l: 'Awaiting Review', highlight: pending.length > 0 },
+    { n: active.length, l: 'In Progress' },
+    { n: projects.length, l: 'Active Projects' },
+    { n: delivered, l: 'Delivered' },
+  ]
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
-      <div className="mb-12">
+    <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12">
+
+      {/* Header */}
+      <div className="mb-8 md:mb-12">
         <div className="label-mono mb-3">Admin Panel</div>
-        <h1 className="font-heading text-3xl tracking-widest text-white">Commission Queue</h1>
+        <h1 className="font-heading text-2xl md:text-3xl tracking-widest text-white">Commission Queue</h1>
       </div>
 
-      {/* Summary stats */}
-      <div className="grid grid-cols-4 gap-px bg-[rgba(196,204,216,0.06)] border border-[rgba(196,204,216,0.06)] mb-10">
-        {[
-          { n: pending.length, l: 'Awaiting Review', highlight: pending.length > 0 },
-          { n: active.length, l: 'In Progress' },
-          { n: projects.length, l: 'Active Projects' },
-          { n: commissions?.filter(c => c.status === 'delivered').length ?? 0, l: 'Delivered' },
-        ].map(({ n, l, highlight }) => (
-          <div key={l} className="bg-abyss px-6 py-5 text-center">
-            <span className={`font-heading text-2xl block ${highlight && n > 0 ? 'text-corona' : 'text-corona'}`}>{n}</span>
-            <span className="font-mono-brand text-[0.48rem] tracking-[0.3em] uppercase text-silver">{l}</span>
+      {/* Stats — 2x2 on mobile, 4 across on desktop */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-[rgba(196,204,216,0.06)] border border-[rgba(196,204,216,0.06)] mb-8 md:mb-10">
+        {stats.map(({ n, l, highlight }) => (
+          <div key={l} className="bg-abyss px-4 md:px-6 py-4 md:py-5 text-center relative overflow-hidden">
+            {highlight && n > 0 && (
+              <div className="absolute top-0 left-0 right-0 h-px bg-corona opacity-60" />
+            )}
+            <span className="font-heading text-xl md:text-2xl block text-corona">{n}</span>
+            <span className="font-mono-brand text-[0.42rem] md:text-[0.48rem] tracking-[0.25em] md:tracking-[0.3em] uppercase text-silver">{l}</span>
           </div>
         ))}
       </div>
 
       {/* New commissions */}
-      <section className="mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="font-heading text-sm tracking-[0.2em] uppercase text-white">
+      <section className="mb-10 md:mb-12">
+        <div className="flex items-center justify-between mb-5 md:mb-6">
+          <h2 className="font-heading text-xs md:text-sm tracking-[0.2em] uppercase text-white flex items-center gap-2">
             New Commissions
-            {pending.length > 0 && <span className="ml-2 font-mono-brand text-[0.5rem] tracking-[0.2em] bg-corona text-void px-1.5 py-0.5">{pending.length}</span>}
+            {pending.length > 0 && (
+              <span className="font-mono-brand text-[0.48rem] tracking-[0.18em] bg-corona text-void px-1.5 py-0.5">
+                {pending.length}
+              </span>
+            )}
           </h2>
         </div>
 
@@ -64,26 +76,28 @@ export default async function AdminPage() {
           <div className="flex flex-col gap-px bg-[rgba(196,204,216,0.06)]">
             {pending.map(c => (
               <a key={c.id} href={`/admin/commission/${c.id}`}
-                className="bg-abyss p-5 flex items-center justify-between hover:bg-surface transition-colors group">
-                <div className="flex items-start gap-6">
-                  <div>
-                    <div className="font-heading text-sm tracking-wider text-white group-hover:text-corona transition-colors mb-1">
+                className="bg-abyss p-4 md:p-5 hover:bg-surface transition-colors group block">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="font-heading text-sm tracking-wider text-white group-hover:text-corona transition-colors mb-1 truncate">
                       {c.community_name}
                     </div>
-                    <div className="font-mono-brand text-[0.48rem] tracking-[0.2em] uppercase text-silver">
+                    <div className="font-mono-brand text-[0.46rem] tracking-[0.2em] uppercase text-silver mb-1">
                       {c.genre} · {c.platform} · {TIER_PRICE[c.tier]}
                     </div>
+                    {(c.email || c.profiles?.email) && (
+                      <div className="text-[0.7rem] text-silver font-light truncate opacity-70">
+                        {c.profiles?.email ?? c.email}
+                      </div>
+                    )}
                   </div>
-                  <div className="text-xs text-silver font-light">
-                    {c.profiles?.email}
+                  <div className="flex items-center justify-between md:justify-end gap-3 md:gap-4 flex-shrink-0">
+                    <span className="font-mono-brand text-[0.44rem] tracking-[0.2em] text-silver">
+                      {new Date(c.created_at).toLocaleDateString()}
+                    </span>
+                    <StatusBadge status={c.status} />
+                    <span className="text-silver text-xs group-hover:text-corona transition-colors hidden md:inline">→</span>
                   </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="font-mono-brand text-[0.46rem] tracking-[0.2em] text-silver">
-                    {new Date(c.created_at).toLocaleDateString()}
-                  </span>
-                  <StatusBadge status={c.status} />
-                  <span className="text-silver text-xs group-hover:text-corona transition-colors">→</span>
                 </div>
               </a>
             ))}
@@ -93,21 +107,23 @@ export default async function AdminPage() {
 
       {/* Active commissions */}
       {active.length > 0 && (
-        <section className="mb-12">
-          <h2 className="font-heading text-sm tracking-[0.2em] uppercase text-white mb-6">In Progress</h2>
+        <section className="mb-10 md:mb-12">
+          <h2 className="font-heading text-xs md:text-sm tracking-[0.2em] uppercase text-white mb-5 md:mb-6">In Progress</h2>
           <div className="flex flex-col gap-px bg-[rgba(196,204,216,0.06)]">
             {active.map(c => (
               <a key={c.id} href={`/admin/commission/${c.id}`}
-                className="bg-abyss p-5 flex items-center justify-between hover:bg-surface transition-colors group">
-                <div>
-                  <div className="font-heading text-sm tracking-wider text-white group-hover:text-corona transition-colors mb-1">{c.community_name}</div>
-                  <div className="font-mono-brand text-[0.48rem] tracking-[0.2em] uppercase text-silver">
-                    {c.genre} · {c.platform} · {TIER_PRICE[c.tier]}
+                className="bg-abyss p-4 md:p-5 hover:bg-surface transition-colors group block">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="font-heading text-sm tracking-wider text-white group-hover:text-corona transition-colors mb-1 truncate">{c.community_name}</div>
+                    <div className="font-mono-brand text-[0.46rem] tracking-[0.2em] uppercase text-silver">
+                      {c.genre} · {c.platform} · {TIER_PRICE[c.tier]}
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <StatusBadge status={c.status} />
-                  <span className="text-silver text-xs group-hover:text-corona transition-colors">→</span>
+                  <div className="flex items-center md:justify-end gap-3 md:gap-4 flex-shrink-0">
+                    <StatusBadge status={c.status} />
+                    <span className="text-silver text-xs group-hover:text-corona transition-colors hidden md:inline">→</span>
+                  </div>
                 </div>
               </a>
             ))}
@@ -118,20 +134,22 @@ export default async function AdminPage() {
       {/* Active projects */}
       {projects.length > 0 && (
         <section>
-          <h2 className="font-heading text-sm tracking-[0.2em] uppercase text-white mb-6">Active Projects</h2>
+          <h2 className="font-heading text-xs md:text-sm tracking-[0.2em] uppercase text-white mb-5 md:mb-6">Active Projects</h2>
           <div className="flex flex-col gap-px bg-[rgba(196,204,216,0.06)]">
             {projects.map(p => (
               <a key={p.id} href={`/admin/project/${p.id}`}
-                className="bg-abyss p-5 flex items-center justify-between hover:bg-surface transition-colors group">
-                <div className="font-heading text-sm tracking-wider text-white group-hover:text-corona transition-colors">{p.title}</div>
-                <div className="flex items-center gap-4">
-                  {p.due_date && (
-                    <span className="font-mono-brand text-[0.46rem] tracking-[0.2em] uppercase text-silver">
-                      Due {new Date(p.due_date).toLocaleDateString()}
-                    </span>
-                  )}
-                  <StatusBadge status={p.status} />
-                  <span className="text-silver text-xs group-hover:text-corona transition-colors">→</span>
+                className="bg-abyss p-4 md:p-5 hover:bg-surface transition-colors group block">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                  <div className="font-heading text-sm tracking-wider text-white group-hover:text-corona transition-colors truncate min-w-0 flex-1">{p.title}</div>
+                  <div className="flex items-center md:justify-end gap-3 md:gap-4 flex-shrink-0">
+                    {p.due_date && (
+                      <span className="font-mono-brand text-[0.44rem] tracking-[0.2em] uppercase text-silver">
+                        Due {new Date(p.due_date).toLocaleDateString()}
+                      </span>
+                    )}
+                    <StatusBadge status={p.status} />
+                    <span className="text-silver text-xs group-hover:text-corona transition-colors hidden md:inline">→</span>
+                  </div>
                 </div>
               </a>
             ))}

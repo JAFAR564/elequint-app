@@ -28,32 +28,32 @@ export default async function AdminProjectPage({ params }: { params: Promise<{ i
   const messages = (rawMessages ?? []) as MessageRow[]
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-12">
-      <a href="/admin" className="font-mono-brand text-[0.5rem] tracking-[0.3em] uppercase text-silver hover:text-corona transition-colors mb-8 inline-block">
+    <div className="max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-12">
+      <a href="/admin" className="font-mono-brand text-[0.5rem] tracking-[0.3em] uppercase text-silver hover:text-corona transition-colors mb-6 md:mb-8 inline-block">
         ← Admin
       </a>
 
-      <div className="flex items-start justify-between mb-10">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8 md:mb-10">
+        <div className="min-w-0">
           <div className="label-mono mb-3">Project Management</div>
-          <h1 className="font-heading text-2xl tracking-widest text-white">{project.title}</h1>
+          <h1 className="font-heading text-xl md:text-2xl tracking-widest text-white break-words">{project.title}</h1>
           {project.due_date && (
             <p className="font-mono-brand text-[0.5rem] tracking-[0.2em] uppercase text-silver mt-2">
               Due {new Date(project.due_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
             </p>
           )}
         </div>
-        <StatusBadge status={project.status} />
+        <div className="flex-shrink-0">
+          <StatusBadge status={project.status} />
+        </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-6">
-        <div className="col-span-3 space-y-6">
-          {/* Admin actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6">
+        <div className="lg:col-span-3 space-y-6">
           <AdminProjectActions project={project} deliverables={deliverables} />
         </div>
 
-        {/* Messages */}
-        <div className="col-span-2">
+        <div className="lg:col-span-2">
           <MessageThread projectId={project.id} initialMessages={messages} userId={user!.id} />
         </div>
       </div>

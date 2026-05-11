@@ -40,30 +40,32 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   const currentStep = STEP_ORDER.indexOf(project.status)
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-12">
+    <div className="max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-12">
 
       {/* Back */}
-      <a href="/dashboard" className="font-mono-brand text-[0.5rem] tracking-[0.3em] uppercase text-silver hover:text-corona transition-colors mb-8 inline-block">
+      <a href="/dashboard" className="font-mono-brand text-[0.5rem] tracking-[0.3em] uppercase text-silver hover:text-corona transition-colors mb-6 md:mb-8 inline-block">
         ← Dashboard
       </a>
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-10">
-        <div>
-          <h1 className="font-heading text-2xl tracking-widest text-white mb-3">{project.title}</h1>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8 md:mb-10">
+        <div className="min-w-0">
+          <h1 className="font-heading text-xl md:text-2xl tracking-widest text-white mb-3 break-words">{project.title}</h1>
           {project.due_date && (
             <p className="font-mono-brand text-[0.5rem] tracking-[0.25em] uppercase text-silver">
               Due {new Date(project.due_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
             </p>
           )}
         </div>
-        <StatusBadge status={project.status} />
+        <div className="flex-shrink-0">
+          <StatusBadge status={project.status} />
+        </div>
       </div>
 
       {/* Status timeline */}
-      <div className="border border-[rgba(196,204,216,0.06)] bg-abyss p-6 mb-8">
-        <div className="label-mono mb-6">Progress</div>
-        <div className="flex items-center">
+      <div className="border border-[rgba(196,204,216,0.06)] bg-abyss p-4 md:p-6 mb-6 md:mb-8 overflow-x-auto">
+        <div className="label-mono mb-5 md:mb-6">Progress</div>
+        <div className="flex items-center min-w-[480px]">
           {PROJECT_STEPS.map((step, i) => {
             const done = i < currentStep
             const active = i === currentStep
@@ -88,11 +90,11 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6">
         {/* Left: deliverables */}
-        <div className="col-span-3 space-y-6">
-          <div className="border border-[rgba(196,204,216,0.06)] bg-abyss p-6">
-            <div className="label-mono mb-6">Deliverables</div>
+        <div className="lg:col-span-3 space-y-6">
+          <div className="border border-[rgba(196,204,216,0.06)] bg-abyss p-5 md:p-6">
+            <div className="label-mono mb-5 md:mb-6">Deliverables</div>
             {!deliverables?.length ? (
               <p className="text-silver text-sm font-light">Nothing delivered yet. We&apos;ll add files and links here as work progresses.</p>
             ) : (
@@ -119,7 +121,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           </div>
 
           {project.notes && (
-            <div className="border border-[rgba(196,204,216,0.06)] bg-abyss p-6">
+            <div className="border border-[rgba(196,204,216,0.06)] bg-abyss p-5 md:p-6">
               <div className="label-mono mb-4">Notes from Elequint</div>
               <p className="text-silver text-sm font-light leading-relaxed whitespace-pre-wrap">{project.notes}</p>
             </div>
@@ -127,7 +129,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         </div>
 
         {/* Right: messages */}
-        <div className="col-span-2">
+        <div className="lg:col-span-2">
           <MessageThread projectId={project.id} initialMessages={messages} userId={user.id} />
         </div>
       </div>
