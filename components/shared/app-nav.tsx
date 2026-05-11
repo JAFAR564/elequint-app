@@ -22,11 +22,11 @@ export function AppNav({ role, email }: AppNavProps) {
 
   const links = role === 'admin'
     ? [
-        { href: '/admin', label: 'Commissions' },
+        { href: '/admin', label: 'Dashboard' },
         { href: '/portfolio', label: 'Portfolio' },
       ]
     : [
-        { href: '/dashboard', label: 'Projects' },
+        { href: '/dashboard', label: 'Dashboard' },
         { href: '/commission', label: 'New Commission' },
         { href: '/portfolio', label: 'Portfolio' },
       ]
