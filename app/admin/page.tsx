@@ -77,7 +77,31 @@ export default async function AdminPage() {
             {pending.map(c => (
               <a key={c.id} href={`/admin/commission/${c.id}`}
                 className="bg-abyss p-4 md:p-5 hover:bg-surface transition-colors group block">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                {/* Mobile layout: status pinned top-right, info stacked below */}
+                <div className="md:hidden">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <div className="font-heading text-sm tracking-wider text-white group-hover:text-corona transition-colors truncate min-w-0 flex-1">
+                      {c.community_name}
+                    </div>
+                    <div className="flex-shrink-0"><StatusBadge status={c.status} /></div>
+                  </div>
+                  <div className="font-mono-brand text-[0.46rem] tracking-[0.2em] uppercase text-silver mb-1">
+                    {c.genre} · {c.platform} · {TIER_PRICE[c.tier]}
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    {(c.email || c.profiles?.email) && (
+                      <div className="text-[0.7rem] text-silver font-light truncate opacity-70 min-w-0 flex-1">
+                        {c.profiles?.email ?? c.email}
+                      </div>
+                    )}
+                    <span className="font-mono-brand text-[0.44rem] tracking-[0.2em] text-silver flex-shrink-0">
+                      {new Date(c.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Desktop layout: horizontal */}
+                <div className="hidden md:flex items-center justify-between gap-4">
                   <div className="min-w-0 flex-1">
                     <div className="font-heading text-sm tracking-wider text-white group-hover:text-corona transition-colors mb-1 truncate">
                       {c.community_name}
@@ -91,12 +115,12 @@ export default async function AdminPage() {
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center justify-between md:justify-end gap-3 md:gap-4 flex-shrink-0">
+                  <div className="flex items-center gap-4 flex-shrink-0">
                     <span className="font-mono-brand text-[0.44rem] tracking-[0.2em] text-silver">
                       {new Date(c.created_at).toLocaleDateString()}
                     </span>
                     <StatusBadge status={c.status} />
-                    <span className="text-silver text-xs group-hover:text-corona transition-colors hidden md:inline">→</span>
+                    <span className="text-silver text-xs group-hover:text-corona transition-colors">→</span>
                   </div>
                 </div>
               </a>
