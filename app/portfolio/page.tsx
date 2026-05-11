@@ -1,3 +1,6 @@
+import { createClient } from '@/lib/supabase/server'
+import { AppNav } from '@/components/shared/app-nav'
+
 const CASES = [
   {
     id: 'aetherborne-saga',
@@ -42,19 +45,42 @@ const CASES = [
 
 const TIER_PRICE: Record<string, string> = { Foundation: '$5', Presence: '$10', Architecture: 'Custom' }
 
-export default function PortfolioPage() {
+export default async function PortfolioPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  let role: 'client' | 'admin' | undefined
+  let email: string | undefined
+
+  if (user) {
+    const { data: rawProfile } = await supabase
+      .from('profiles')
+      .select('role, email')
+      .eq('id', user.id)
+      .single()
+    const profile = rawProfile as { role: 'client' | 'admin'; email: string } | null
+    if (profile) {
+      role = profile.role
+      email = profile.email
+    }
+  }
+
   return (
     <div className="min-h-screen" style={{
       background: 'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(232,184,109,0.03) 0%, transparent 60%), var(--void)'
     }}>
-      <nav className="border-b border-[rgba(196,204,216,0.06)] px-4 md:px-6 py-4 flex items-center justify-between"
-        style={{ background: 'rgba(11,13,26,0.9)', backdropFilter: 'blur(16px)' }}>
-        <a href="https://elequint-website.vercel.app" className="font-heading text-xs tracking-[0.2em] uppercase text-corona">Elequint</a>
-        <div className="flex items-center gap-4 md:gap-6">
-          <a href="/commission" className="font-mono-brand text-[0.5rem] md:text-[0.52rem] tracking-[0.22em] md:tracking-[0.25em] uppercase text-silver hover:text-white transition-colors">Commission</a>
-          <a href="/auth/login" className="font-mono-brand text-[0.5rem] md:text-[0.52rem] tracking-[0.22em] md:tracking-[0.25em] uppercase text-silver hover:text-white transition-colors">Login</a>
-        </div>
-      </nav>
+      {user ? (
+        <AppNav role={role} email={email} />
+      ) : (
+        <nav className="border-b border-[rgba(196,204,216,0.06)] px-4 md:px-6 py-4 flex items-center justify-between"
+          style={{ background: 'rgba(11,13,26,0.9)', backdropFilter: 'blur(16px)' }}>
+          <a href="https://elequint-website.vercel.app" className="font-heading text-xs tracking-[0.2em] uppercase text-corona">Elequint</a>
+          <div className="flex items-center gap-4 md:gap-6">
+            <a href="/commission" className="font-mono-brand text-[0.5rem] md:text-[0.52rem] tracking-[0.22em] md:tracking-[0.25em] uppercase text-silver hover:text-white transition-colors">Commission</a>
+            <a href="/auth/login" className="font-mono-brand text-[0.5rem] md:text-[0.52rem] tracking-[0.22em] md:tracking-[0.25em] uppercase text-silver hover:text-white transition-colors">Login</a>
+          </div>
+        </nav>
+      )}
 
       <div className="max-w-5xl mx-auto px-4 md:px-6 py-10 md:py-16">
         <div className="mb-10 md:mb-14 text-center">
